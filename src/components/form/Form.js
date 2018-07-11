@@ -1,20 +1,59 @@
 import React, { Component } from 'react';
-import {Row,Input} from 'react-materialize'
+import {Table, Row, Col, Preloader} from 'react-materialize'
 
-class Form extends Component {
-  render() {
+export class Form extends Component {
+
+  constructor(props) {
+
+    super(props);
+    this.state = { logs: [], loading: true };
+
+    fetch('http://localhost:50596/Api/Logger/GetLogs?_deviceID=96D88A707C3CA2AB203348A64CC55CD41E800248')
+      .then(response => response.json())
+      .then(data => {
+        this.setState({ logs: data, loading: false });
+      });
+
+  }
+
+  static renderLogsTable(logs) {
     return (
-      <div className="Form">
-        <Row>
-          <Input placeholder="Placeholder" s={6} label="First Name" />
-          <Input s={6} label="Last Name" />
-          <Input s={12} label="disabled" defaultValue="I am not editable" disabled />
-          <Input type="password" label="password" s={12} />
-          <Input type="email" label="Email" s={12} />
-        </Row>
+      <Table className="responsive-table striped highlight">
+        <thead>
+          <tr>
+            <th data-field="id">Machine ID</th>
+            <th data-field="name">Logs</th>
+            <th data-field="price">Date Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {logs.map(logs =>
+            <tr>
+              <td>{logs.deviceID}</td>
+              <td>{logs.logs}</td>
+              <td>{logs.logdate}</td>
+            </tr>
+          )}
+        </tbody>
+      </Table>
+    );
+  }
+
+  render() {
+    let contents = this.state.loading
+      ? <center>
+          <Preloader flashing size='big'/>
+        </center>
+      : Form.renderLogsTable(this.state.logs);
+
+    return (
+      <div className="container">
+        <h3>Api Logs</h3>
+        {contents}
       </div>
     );
   }
 }
 
 export default Form;
+
