@@ -6,21 +6,34 @@ class Header extends Component {
   render() {
     return (
       <div className="Header">
-        <Navbar brand='ReactJS Training' left className="#1976d2 blue darken-2">
+      <Navbar brand='PTech' left className="#1976d2 blue darken-2">
            
-        <ul className="left hide-on-med-and-down">
-          <li><Link to="/home"><Icon>home</Icon></Link></li>
-          <li><Link to="/contact"><Icon>contacts</Icon></Link></li>
-          <li><Link to="/tutorial"><Icon>school</Icon></Link></li>
-          <li><Link to="/"><Icon>reorder</Icon></Link></li>
-          
-        </ul>
+           <ul className="left hide-on-med-and-down">
+   
+             <li className="tooltipped" data-position="bottom" data-tooltip="Choose">
+   
+             <Dropdown trigger={
+                 <Button>Choose Filter</Button>
+                 }>
+   
+                   <li><Link to="/ptech-processor-post">Assets</Link></li>
+                   <li><Link to="/ptech-processor-post">Categories</Link></li>
+                   <li><Link to="/ptech-processor-post">Manufacturers</Link></li>
+                   <li><Link to="/ptech-processor-post">Models</Link></li>
+                   <li><Link to="/ptech-processor-post">Hard Disk</Link></li>
+                   <li><Link to="/ptech-processor-post">Memory</Link></li>
+                   <li><Link to="/ptech-processor-post">Video Card</Link></li>
+                   <li><Link to="/ptech-processor-post">Suppliers</Link></li>
+                   <li><Link to="/ptech-processor-get">Processor</Link></li>
+                   <li><Link to="/ptech-processor-post">Types</Link></li>
+   
+             </Dropdown>
+             </li>     
+   
+           </ul>
+   
+           </Navbar>
 
-            {/* <Link className="left hide-on-med-and-down" to="/home"><Icon>home</Icon></Link>
-            <Link className="left hide-on-med-and-down" to="/contact"><Icon>contacts</Icon></Link>
-            <Link className="left hide-on-med-and-down dropdown-trigger" data-target="dropdown" to="/tutorial"><Icon>school</Icon></Link> */}
-
-        </Navbar>
       </div>
     );
   }

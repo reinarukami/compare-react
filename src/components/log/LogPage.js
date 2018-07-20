@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import {Table, Row, Col, Preloader} from 'react-materialize'
+import {Table, Preloader} from 'react-materialize'
 
-export class Form extends Component {
+export class LogPage extends Component {
 
   constructor(props) {
 
@@ -44,7 +44,7 @@ export class Form extends Component {
       ? <center>
           <Preloader flashing size='big'/>
         </center>
-      : Form.renderLogsTable(this.state.logs);
+      : LogPage.renderLogsTable(this.state.logs);
 
     return (
       <div className="container">
@@ -55,5 +55,5 @@ export class Form extends Component {
   }
 }
 
-export default Form;
+export default LogPage;
 

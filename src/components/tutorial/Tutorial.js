@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import {Navbar, Icon, Dropdown, Button, NavItem} from 'react-materialize';
+import {Button} from 'react-materialize';
+import {Redirect, Route, withRouter} from 'react-router-dom';
 
 export default class Tutorial extends Component {
 
@@ -12,6 +13,7 @@ export default class Tutorial extends Component {
         } ;
         this.handleClick = this.handleClick.bind(this);
         this.handleClick2 = this.handleClick2.bind(this);
+        this.handleClick3 = this.handleClick3.bind(this);
     }
 
     handleClick(){
@@ -26,6 +28,14 @@ export default class Tutorial extends Component {
       }));
     }
 
+    handleClick3(){
+    <Route exact path="/" render={() => (
+
+        <Redirect to="/form"/>
+
+    )}/>
+    }
+
 
   render() {
 
@@ -33,11 +43,17 @@ export default class Tutorial extends Component {
  
     return (
       <div>
-        {this.state.increment}
-        <Button waves='light' className={colorchange} onClick={this.handleClick}>Change Color</Button> 
+        <Button waves='light' className={colorchange} onClick={this.handleClick}>Change Color</Button>
+        <br/>
+        <br/>
         <Button waves='light' onClick={this.handleClick2}>Increment</Button> 
+        <br/>
+        <br/>
+        <Button waves='light' onClick={this.handleClick3}>Go to Form</Button> 
+        {this.state.increment}
       </div>
     )
   }
 }
+
 
