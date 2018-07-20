@@ -45,7 +45,7 @@ export default class ProcessorListComponent extends Component {
     .then(data => {
       if(data.success != false)
       {
-      this.setState({ list: data, loading: false, newcontents: ProcessorListComponent.rederTable(data)});  
+      this.setState({ list: data, loading: false, newcontents: ProcessorListComponent.renderTablebyID(data)});  
       }
     });
   }
@@ -83,15 +83,34 @@ export default class ProcessorListComponent extends Component {
             <th data-field="name">Processor Name</th>
           </tr>
         </thead>
-        <tbody>
-          
+        <tbody>       
           {list.list.map(list =>
             <tr key={list.id}>
               <td>{list.id}</td>
               <td>{list.name}</td>
             </tr>
           )}
+        </tbody>  
+      </Table>
+    </div>
+    );
+  }
 
+  static renderTablebyID(list,page) {
+    return (      
+      <div>
+      <Table className="responsive-table striped highlight">
+        <thead>
+          <tr>
+            <th data-field="id">ID</th>
+            <th data-field="name">Processor Name</th>
+          </tr>
+        </thead>
+        <tbody>       
+          <tr key={list.id}>
+            <td>{list.id}</td>
+            <td>{list.name}</td>
+          </tr>
         </tbody>  
       </Table>
     </div>
