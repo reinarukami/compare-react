@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+// import Common from './CommonComponent';
 import {Table, ProgressBar, Pagination, Modal, Button, Row , Input , Icon,  Col} from 'react-materialize'
 
 export default class ProcessorListComponent extends Component {
@@ -7,35 +8,35 @@ export default class ProcessorListComponent extends Component {
   {
     super(props);
      this.state = { list: [], listWithPager : [], loading: true, newcontents:'', showAll:false, _activePage:1};
+     this.postState = {name:''};
+     this.putState = {id:'',name:''};
 
-     this.showAll = false;
-
-     
   }
 
-  componentDidMount(){
-    
-     this.GetAll();
-     this.GetWithPager();
+  componentDidMount()
+  { 
+     this.GetWithPager(this.state._activePage);
   }
-
 
   handleChange = (event) =>
   {     
-    this.setState({
-      [event.target.name] : event.target.value,
-    });
+    this.postState.name = event.target.value;
   }
 
-  PageStatus = (state) => 
+  handleUpdateChange = (event) =>
+  {     
+    this.postState.name = event.target.value;
+  }
+
+  PageStatus = async(state) => 
   {
      if(state.showAll)
      {
-      this.setState({loading: false, newcontents: ProcessorListComponent.renderTable(state.list)})
+      this.GetAll();
      }
      else
      {
-      this.setState({loading: false, newcontents: ProcessorListComponent.renderTable(state.listWithPager)})
+      this.GetWithPager(this.state._activePage);
      }
   }
 
@@ -45,21 +46,21 @@ export default class ProcessorListComponent extends Component {
      this.PageStatus(this.state, this.ShowAll);
   }
 
-  GetAll = async() =>
+  GetAll = () =>
   {
       fetch('http://localhost:57254/api/Processors/?ShowAll=true' , {method:'get'})
       .then(response => response.json())
       .then(data => {
-        this.setState({ list: data, loading: false});  
+        this.setState({ list: data, loading: false , newcontents: this.renderTable(data , this)});  
       });
   }
 
-  GetWithPager = async() =>
+  GetWithPager = (_activePage) => 
   {
-      fetch('http://localhost:57254/api/Processors' , {method:'get'})
+      fetch('http://localhost:57254/api/Processors?CurrentPage=' + _activePage  , {method:'get'})
       .then(response => response.json())
       .then(data => {
-        this.setState({ listWithPager: data, loading: false});  
+        this.setState({ listWithPager: data, loading: false,  newcontents: this.renderTable(data , this)});  
       });
   }
 
@@ -76,7 +77,7 @@ export default class ProcessorListComponent extends Component {
       .then(data => {
         if(data.success != false)
         {
-        this.setState({ loading: false, newcontents: ProcessorListComponent.renderTablebyID(data)});  
+        this.setState({ loading: false, newcontents: this.renderTablebyID(data , this)});  
         }
       });
     }
@@ -90,38 +91,35 @@ export default class ProcessorListComponent extends Component {
       fetch('http://localhost:57254/api/Processors/?CurrentPage=' + pagestat , {method:'get'})
       .then(response => response.json())
       .then(data => {
-        this.setState({ listWithPager: data, loading: false, newcontents: ProcessorListComponent.renderTable(data)});  
+        this.setState({ listWithPager: data, loading: false, newcontents: this.renderTable(data, this)});  
       });
   }
 
-  Post = async() =>
+  Post = () =>
   {
-    await this.timeout(1000, fetch('http://localhost:57254/api/Processors' , {method:'POST', headers:{ 'Accept': 'application/json', 'Content-Type':'application/json'}, body:JSON.stringify(this.state)}))
+    fetch('http://localhost:57254/api/Processors' , {method:'POST', headers:{ 'Accept': 'application/json', 'Content-Type':'application/json'}, body:JSON.stringify(this.postState)})
     .then(response => response.json())
     .then(data =>{
-
+      this.PageStatus(this.state); 
     })
     .catch(error => console.error('Fetch Error =\n', error));
-    this.GetAll();
-    this.GetWithPager();
-    this.PageStatus(this.state); 
   }
 
-  async timeout(ms, promise) {
-    return new Promise(function(resolve, reject) {
-      setTimeout(function() {
-        reject(new Error("timeout"))
-      }, ms)
-      promise.then(resolve, reject)
-    })
+  Put = (id) =>
+  {
+    alert(id);
+    // fetch('http://localhost:57254/api/Processors/' , {method:'PUT', headers:{ 'Accept': 'application/json', 'Content-Type':'application/json'}, body:JSON.stringify(this.state)})
+    // .then(response => response.json())
+    // .then(data =>{
+    //   this.PageStatus(this.state); 
+    // })
+    // .catch(error => console.error('Fetch Error =\n', error));
   }
-
   
-
-  static renderTable(list,page) {
+   renderTable=(list, state)=>{
     return (      
       <div>
-      <Table className="responsive-table striped highlight">
+      <Table className="responsive-table striped highlight centered">
         <thead>
           <tr>
             <th data-field="id">ID</th>
@@ -133,6 +131,17 @@ export default class ProcessorListComponent extends Component {
             <tr key={list.id}>
               <td>{list.id}</td>
               <td>{list.name}</td>
+              <td><Modal
+          actions={<Button onClick={this.Put(list.id)} className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
+          header='Edit Processor'
+          trigger={<Button className='#f4ff81 lime accent-1' >Edit Processor</Button>}>
+
+
+            <Row>
+                <Input name="name" type="email" value={list.name} label="Processor" s={12} onChange={(event) => this.handleUpdateChange(event)}/>    
+            </Row> 
+
+    </Modal></td>
             </tr>
           )}
         </tbody>  
@@ -141,10 +150,10 @@ export default class ProcessorListComponent extends Component {
     );
   }
 
-  static renderTablebyID(list,page) {
+    renderTablebyID=(list, state)=>{
     return (      
       <div>
-      <Table className="responsive-table striped highlight">
+      <Table className="responsive-table striped highlight centered">
         <thead>
           <tr>
             <th data-field="id">ID</th>
@@ -163,6 +172,7 @@ export default class ProcessorListComponent extends Component {
   }
 
   render() {
+
       
     let contents = this.state.loading
       ? <center><Col s={3}>
@@ -194,11 +204,12 @@ export default class ProcessorListComponent extends Component {
 
    <Pagination items={this.state.listWithPager.totalPage} activePage={this.state._activePage} maxButtons={this.state.listWithPager.totalPage} onSelect={this.FetchPage}/>
    
+
    <center>
       <Input id='testcheck' name='group1' type='checkbox' label='DisplayAll' onChange={(event) => this.TogglePage(event)}/>
    </center>
 
-   <Button onClick={this.GetAll}>Get All</Button>
+
 
   </div>
 
