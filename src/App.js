@@ -8,8 +8,11 @@ import Tutorial from './components/tutorial/Tutorial';
 import LogPage from './components/log/LogPage';
 import Form from './components/tutorial/Form';
 import FormSubmit from './components/tutorial/FormSubmit';
-import ProcessorListComponent from './components/ptech/ProcessorListComponent';
-import ProcessorPostComponent from './components/ptech/ProcessorPostComponent'
+import ProcessorComponent from './components/ptech/ProcessorComponent';
+import ManufacturerComponent from './components/ptech/ManufacturerComponent';
+import ModelComponent from './components/ptech/ModelComponent';
+import SupplierComponent from './components/ptech/SupplierComponent';
+import CategoriesComponent from './components/ptech/CategoriesComponent';
 import {Route} from 'react-router-dom';
 
 
@@ -28,8 +31,12 @@ class App extends Component {
           <Route path ="/form-submit" component={FormSubmit} />
 
           {/* Ptech Activity */}
-          <Route path ="/ptech-processor-get" component={ProcessorListComponent} />
-          <Route path ="/ptech-processor-post" component={ProcessorPostComponent} />
+          <Route path ="/ptech-processor" component={ProcessorComponent} />
+          <Route path ="/ptech-manufacturer" component={ManufacturerComponent} />
+          <Route path ="/ptech-model" component={ModelComponent} />
+          <Route path ="/ptech-supplier" component={SupplierComponent} />
+          <Route path ="/ptech-categories" component={CategoriesComponent} />
+   
 
           <br/>
           <Footers />

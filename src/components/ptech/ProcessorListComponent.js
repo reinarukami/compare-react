@@ -10,7 +10,6 @@ export default class ProcessorListComponent extends Component {
      this.state = { list: [], listWithPager : [], loading: true, newcontents:'', showAll:false, _activePage:1};
      this.postState = {name:''};
      this.putState = {id:'',name:''};
-
   }
 
   componentDidMount()
@@ -23,9 +22,10 @@ export default class ProcessorListComponent extends Component {
     this.postState.name = event.target.value;
   }
 
-  handleUpdateChange = (event) =>
+  handleUpdateChange = (event, id) =>
   {     
-    this.postState.name = event.target.value;
+    this.putState.id = id;
+    this.putState.name = event.target.value;
   }
 
   PageStatus = async(state) => 
@@ -51,7 +51,7 @@ export default class ProcessorListComponent extends Component {
       fetch('http://localhost:57254/api/Processors/?ShowAll=true' , {method:'get'})
       .then(response => response.json())
       .then(data => {
-        this.setState({ list: data, loading: false , newcontents: this.renderTable(data , this)});  
+        this.setState({ list: data, loading: false , newcontents: ProcessorListComponent.renderTable(data, this)});  
       });
   }
 
@@ -60,7 +60,7 @@ export default class ProcessorListComponent extends Component {
       fetch('http://localhost:57254/api/Processors?CurrentPage=' + _activePage  , {method:'get'})
       .then(response => response.json())
       .then(data => {
-        this.setState({ listWithPager: data, loading: false,  newcontents: this.renderTable(data , this)});  
+        this.setState({ listWithPager: data, loading: false,  newcontents: ProcessorListComponent.renderTable(data, this)});  
       });
   }
 
@@ -77,7 +77,7 @@ export default class ProcessorListComponent extends Component {
       .then(data => {
         if(data.success != false)
         {
-        this.setState({ loading: false, newcontents: this.renderTablebyID(data , this)});  
+        this.setState({ loading: false, newcontents: ProcessorListComponent.renderTablebyID(data , this)});  
         }
       });
     }
@@ -91,7 +91,7 @@ export default class ProcessorListComponent extends Component {
       fetch('http://localhost:57254/api/Processors/?CurrentPage=' + pagestat , {method:'get'})
       .then(response => response.json())
       .then(data => {
-        this.setState({ listWithPager: data, loading: false, newcontents: this.renderTable(data, this)});  
+        this.setState({ listWithPager: data, loading: false, newcontents: ProcessorListComponent.renderTable(data, this)});  
       });
   }
 
@@ -105,18 +105,17 @@ export default class ProcessorListComponent extends Component {
     .catch(error => console.error('Fetch Error =\n', error));
   }
 
-  Put = (id) =>
+  Put = (state) =>
   {
-    alert(id);
-    // fetch('http://localhost:57254/api/Processors/' , {method:'PUT', headers:{ 'Accept': 'application/json', 'Content-Type':'application/json'}, body:JSON.stringify(this.state)})
-    // .then(response => response.json())
-    // .then(data =>{
-    //   this.PageStatus(this.state); 
-    // })
-    // .catch(error => console.error('Fetch Error =\n', error));
+    fetch('http://localhost:57254/api/Processors/' + state.putState.id , {method:'PUT', headers:{ 'Accept': 'application/json', 'Content-Type':'application/json'}, body:JSON.stringify(state.putState)})
+    .then(response => response.json())
+    .then(data =>{
+      this.PageStatus(this.state); 
+    })
+    .catch(error => console.error('Fetch Error =\n', error));
   }
   
-   renderTable=(list, state)=>{
+  static renderTable(list, state) {
     return (      
       <div>
       <Table className="responsive-table striped highlight centered">
@@ -131,17 +130,16 @@ export default class ProcessorListComponent extends Component {
             <tr key={list.id}>
               <td>{list.id}</td>
               <td>{list.name}</td>
-              <td><Modal
-          actions={<Button onClick={this.Put(list.id)} className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
-          header='Edit Processor'
-          trigger={<Button className='#f4ff81 lime accent-1' >Edit Processor</Button>}>
-
-
-            <Row>
-                <Input name="name" type="email" value={list.name} label="Processor" s={12} onChange={(event) => this.handleUpdateChange(event)}/>    
-            </Row> 
-
-    </Modal></td>
+              <td>
+                  <Modal
+                      actions={<Button onClick={(event) => state.Put(state)} className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
+                      header={list.name}
+                      trigger={<Button className ='#f4ff81 lime accent-1' >Edit Processor</Button>}>
+                      <Row>
+                          <Input name="name" type="email" label="Processor" s={12} onChange={(event) => state.handleUpdateChange(event, list.id)}/>                         
+                      </Row> 
+                 </Modal>
+            </td>
             </tr>
           )}
         </tbody>  
@@ -150,7 +148,7 @@ export default class ProcessorListComponent extends Component {
     );
   }
 
-    renderTablebyID=(list, state)=>{
+  static renderTablebyID(list) {
     return (      
       <div>
       <Table className="responsive-table striped highlight centered">
@@ -164,6 +162,17 @@ export default class ProcessorListComponent extends Component {
           <tr key={list.id}>
             <td>{list.id}</td>
             <td>{list.name}</td>
+            <td>
+                  <Modal
+                      actions={<Button onClick={(event) => this.Put()} className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
+                      header={list.name}
+                      trigger={<Button className ='#f4ff81 lime accent-1' >Edit Processor</Button>}>
+
+                      <Row>
+                          <Input name="name" type="email" label="Processor" s={12} onChange={(event) => this.handleUpdateChange(event, list.id)}/>                         
+                      </Row> 
+                 </Modal>
+            </td>
           </tr>
         </tbody>  
       </Table>
@@ -172,8 +181,7 @@ export default class ProcessorListComponent extends Component {
   }
 
   render() {
-
-      
+    
     let contents = this.state.loading
       ? <center><Col s={3}>
       <ProgressBar />
@@ -181,7 +189,8 @@ export default class ProcessorListComponent extends Component {
       : ''
       
     return (
-      <div className="container">
+     
+     <div className="container">
         <h3>Processor List</h3>       
 
         <Row>
@@ -190,6 +199,8 @@ export default class ProcessorListComponent extends Component {
 
         {contents}
         {this.state.newcontents}
+
+
 
     <Modal
       actions={<Button onClick={this.Post} className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
@@ -206,9 +217,8 @@ export default class ProcessorListComponent extends Component {
    
 
    <center>
-      <Input id='testcheck' name='group1' type='checkbox' label='DisplayAll' onChange={(event) => this.TogglePage(event)}/>
+      <Input type='checkbox' label='DisplayAll' onChange={(event) => this.TogglePage(event)}/>
    </center>
-
 
 
   </div>

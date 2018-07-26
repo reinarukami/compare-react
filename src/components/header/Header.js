@@ -17,15 +17,14 @@ class Header extends Component {
                  }>
    
                    <li><Link to="/ptech-processor-post">Assets</Link></li>
-                   <li><Link to="/ptech-processor-post">Categories</Link></li>
-                   <li><Link to="/ptech-processor-post">Manufacturers</Link></li>
-                   <li><Link to="/ptech-processor-post">Models</Link></li>
+                   <li><Link to="/ptech-categories">Categories</Link></li>
+                   <li><Link to="/ptech-manufacturer">Manufacturers</Link></li>
+                   <li><Link to="/ptech-model">Models</Link></li>
                    <li><Link to="/ptech-processor-post">Hard Disk</Link></li>
                    <li><Link to="/ptech-processor-post">Memory</Link></li>
                    <li><Link to="/ptech-processor-post">Video Card</Link></li>
-                   <li><Link to="/ptech-processor-post">Suppliers</Link></li>
-                   <li><Link to="/ptech-processor-get">Processor</Link></li>
-                   <li><Link to="/ptech-processor-post">Types</Link></li>
+                   <li><Link to="/ptech-supplier">Suppliers</Link></li>
+                   <li><Link to="/ptech-processor">Processor</Link></li>
    
              </Dropdown>
              </li>     
