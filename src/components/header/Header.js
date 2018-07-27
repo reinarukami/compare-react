@@ -16,15 +16,18 @@ class Header extends Component {
                  <Button>Choose Filter</Button>
                  }>
    
-                   <li><Link to="/ptech-processor-post">Assets</Link></li>
+                   <li><Link to="/ptech-asset">Assets</Link></li>
                    <li><Link to="/ptech-categories">Categories</Link></li>
                    <li><Link to="/ptech-manufacturer">Manufacturers</Link></li>
                    <li><Link to="/ptech-model">Models</Link></li>
-                   <li><Link to="/ptech-processor-post">Hard Disk</Link></li>
-                   <li><Link to="/ptech-processor-post">Memory</Link></li>
-                   <li><Link to="/ptech-processor-post">Video Card</Link></li>
+                   <li><Link to="/ptech-harddisk">Hard Disk</Link></li>
+                   <li><Link to="/ptech-memory">Memory</Link></li>
+                   <li><Link to="/ptech-videocard">Video Card</Link></li>
                    <li><Link to="/ptech-supplier">Suppliers</Link></li>
                    <li><Link to="/ptech-processor">Processor</Link></li>
+
+                   
+
    
              </Dropdown>
              </li>     

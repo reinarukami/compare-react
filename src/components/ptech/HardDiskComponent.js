@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import Common from './CommonComponent';
 import {ProgressBar, Pagination, Modal, Button, Row , Input , Icon,  Col} from 'react-materialize'
 
-export default class ProcessorComponent extends Common {
+export default class HardDiskComponent extends Common {
 
     constructor(props) 
     {
@@ -16,10 +16,10 @@ export default class ProcessorComponent extends Common {
         newcontents:'', 
         showAll:false, 
         activePage:1, 
-        PageType:'Model',
-        link:'http://localhost:57254/api/Models/',
-        postState : {name:''},
-        putState : {id:'',name:''}
+        PageType:'HardDisk',
+        link:'http://localhost:57254/api/Sizes/harddisk/',
+        postState : {size:''},
+        putState : {id:'',size:''}
       };
 
     }
@@ -31,13 +31,13 @@ export default class ProcessorComponent extends Common {
 
     handleChange = (event) =>
     {     
-      this.state.postState.name = event.target.value;
+      this.state.postState.size = event.target.value;
     }
 
     handleUpdateChange = (event, id) =>
     {     
       this.state.putState.id = id;
-      this.state.putState.name = event.target.value;
+      this.state.putState.size = event.target.value;
     }
 
     render() {
@@ -63,11 +63,11 @@ export default class ProcessorComponent extends Common {
 
         <Modal
           actions={<Button onClick={this.Post} className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
-          header= {'Add ' +this.state.PageType}
+          header= {'Add '+this.state.PageType}
           trigger={<Button>Add {this.state.PageType}</Button>}>
 
                 <Row>
-                    <Input name="name" type="email" label={this.state.PageType} s={12} onChange={(event) => this.handleChange(event)}/>            
+                    <Input name="size" type="email" label={'Add '+this.state.PageType} s={12} onChange={(event) => this.handleChange(event)}/>            
                 </Row> 
 
         </Modal>
@@ -78,7 +78,6 @@ export default class ProcessorComponent extends Common {
             </center>
 
             <Pagination items={this.state.listWithPager.totalPage} activePage={this.state._activePage} maxButtons={this.state.listWithPager.totalPage} onSelect={this.FetchPage}/>
-            
         </div>
       );
       

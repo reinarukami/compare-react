@@ -1,0 +1,8 @@
+.Table-Scroll {
+  overflow-y: scroll;
+}
+
+td th{
+  padding:15px 25px;
+}
+

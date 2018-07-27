@@ -13,6 +13,10 @@ import ManufacturerComponent from './components/ptech/ManufacturerComponent';
 import ModelComponent from './components/ptech/ModelComponent';
 import SupplierComponent from './components/ptech/SupplierComponent';
 import CategoriesComponent from './components/ptech/CategoriesComponent';
+import HardDiskComponent from './components/ptech/HardDiskComponent';
+import MemoryComponent from './components/ptech/MemoryComponent';
+import VideoCardComponent from './components/ptech/VideoCardComponent';
+import AssetComponent from './components/ptech/AssetComponent';
 import {Route} from 'react-router-dom';
 
 
@@ -36,7 +40,10 @@ class App extends Component {
           <Route path ="/ptech-model" component={ModelComponent} />
           <Route path ="/ptech-supplier" component={SupplierComponent} />
           <Route path ="/ptech-categories" component={CategoriesComponent} />
-   
+          <Route path ="/ptech-harddisk" component={HardDiskComponent} />
+          <Route path ="/ptech-memory" component={MemoryComponent} />
+          <Route path ="/ptech-videocard" component={VideoCardComponent} />
+          <Route path ="/ptech-asset" component={AssetComponent} />
 
           <br/>
           <Footers />
