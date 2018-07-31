@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import Common from './CommonComponent';
 import {ProgressBar, Pagination, Modal, Button, Row , Input , Icon,  Col} from 'react-materialize'
 
@@ -34,10 +34,15 @@ export default class MemoryComponent extends Common {
       this.state.postState.size = event.target.value;
     }
 
-    handleUpdateChange = (event, id) =>
+    handleUpdate = (_formID) =>
     {     
-      this.state.putState.id = id;
-      this.state.putState.size = event.target.value;
+      var properties = Object.keys(this.state.postState);
+      for(var property = 0; property < properties.length; property++)
+      {
+         this.state.postState[properties[property]] = document.getElementById("EditForm" +_formID).elements[properties[property]].value
+      }
+
+      this.Put(_formID);
     }
 
     render() {
@@ -57,12 +62,13 @@ export default class MemoryComponent extends Common {
            <Input s={3} name="s_processorID" label={this.state.PageType + ' ID'} validate onChange={(event) => this.GetWithID(event)}><Icon>search</Icon></Input> 
         </Row> 
 
+          {this.state.ErrorMessage}
           {this.state.newcontents}
 
         <br/>
 
         <Modal
-          actions={<Button onClick={this.Post()} className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
+          actions={<Button onClick={this.Post} className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
           header= {'Add '+this.state.PageType}
           trigger={<Button>Add {this.state.PageType}</Button>}>
 

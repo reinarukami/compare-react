@@ -7,6 +7,11 @@ export default class CommonComponent extends Component
     constructor(props)
     {
       super(props);
+
+      this.state =
+      {
+        ErrorMessage:'',
+      }
       this.GetWithPager = this.GetWithPager.bind(this);
       this.GetAll = this.GetAll.bind(this);
       this.GetDropDown = this.GetDropDown.bind(this);
@@ -15,19 +20,50 @@ export default class CommonComponent extends Component
       this.renderTable = this.renderTable.bind(this);
     }
 
+
+    MapErrorMessage = (Error) => 
+    {
+        if(Error.length != 0)
+        {
+
+          return (    
+
+            Error.map(Msg =>
+              <p key={Msg}>{Msg}</p>
+             )
+
+            );                     
+        }
+    }
+
     Post = () =>
     {
       fetch(this.state.link , {method:'POST', headers:{ 'Accept': 'application/json', 'Content-Type':'application/json'}, body:JSON.stringify(this.state.postState)})
       .then(response => response.json())
       .then(data =>{
+        if(data.success == true)
+        {
         this.PageStatus(this.state); 
+          this.setState({
+            ErrorMessage : <p>Success executed the operation</p>
+          })
+        }
+        else
+        {
+          this.setState({
+             ErrorMessage : this.MapErrorMessage(data.errorMessages),
+             error:true
+          })
+         
+        }
+       
       })
       .catch(error => console.error('Fetch Error =\n', error));
     }
 
     GetWithID = (event) => 
     {
-        if(event.target.value =='')
+        if(event.target.value == '')
         {
           this.PageStatus(this.state);
         }
@@ -44,23 +80,51 @@ export default class CommonComponent extends Component
       }
     }
 
-    GetWithPager()
+    GetWithKeyword = (event) => 
     {
+        if(event.target.value == '')
+        {
+          this.PageStatus(this.state);
+        }
+        else
+        {
+        fetch(this.state.link + event.target.value , {method:'get'})
+        .then(response => response.json())
+        .then(data => {
+          if(data.success != false)
+          {
+          this.setState({ loading: false, newcontents: this.renderTablebyID(data)});  
+          }
+        });
+      }
+    }
+
+    GetWithPager(callback)
+    {
+        // V2
+        // fetch(this.state.link + '?CurrentPage=' + this.state.activePage  , {method:'get'})
+        // .then(response => response.json())
+        // .then(data => callback(data))
+        
         fetch(this.state.link + '?CurrentPage=' + this.state.activePage  , {method:'get'})
         .then(response => response.json())
         .then(data => {
+          // V2
+          // return data;
           this.setState({ listWithPager: data, loading: false,  newcontents: this.renderTable(data)});  
         }).catch(error => {
           this.setState({loading: false , newcontents: 'No Record Found'})
        });
+    
     }
 
-    SetDropdownTemplate=(data, nameOf, Method)=>{
+    SetDropdownTemplate=(data, nameOf)=>{
 
       var accesskey = Object.keys(data.list[0]);
 
       if(accesskey[1] == "name")
       {
+        
         return (    
           <Input s={6} name={nameOf} type='select' defaultValue='0' label={nameOf} onChange={(event) => this.handleChange(event)}>   
                 <option value='0'></option>   
@@ -194,26 +258,40 @@ export default class CommonComponent extends Component
         });
     }
 
-    Put = () =>
+    Put = (id) =>
     {
-      fetch(this.state.link + this.state.putState.id , {method:'PUT', headers:{ 'Accept': 'application/json', 'Content-Type':'application/json'}, body:JSON.stringify(this.state.postState)})
+      this.state.postState.id = id;
+      fetch(this.state.link + id , {method:'PUT', headers:{ 'Accept': 'application/json', 'Content-Type':'application/json'}, body:JSON.stringify(this.state.postState)})
       .then(response => response.json())
       .then(data =>{
-        this.PageStatus(this.state); 
+        if(data.success == true)
+        {
+          this.setState({
+            ErrorMessage : <p>Success executed the operation</p>
+          })
+          this.PageStatus(this.state); 
+          delete this.state.postState.id;
+        }
+        else
+        {
+          this.setState({
+             ErrorMessage : this.MapErrorMessage(data.errorMessages)
+          })
+          delete this.state.postState.id;
+          this.showErrorModal();
+         
+        }
       })
       .catch(error => console.error('Fetch Error =\n', error));
     }
 
-    SetID = (id) =>
-    {
-      this.state.putState.id = id;
-    }
   
 
     renderTablebyID(list) 
     {
 
       var tablebody =[];
+      var tablemodal;
 
       var tableheader = Object.keys(list).map(key =>           
         <th key={key}>{this.state.PageType} {key}</th>
@@ -223,33 +301,40 @@ export default class CommonComponent extends Component
           <td> {value} </td> 
       );     
 
-      var tablemodal = 
+ 
+      if(this.state.PageType == 'Asset')
+      {
+
+      tablemodal = 
         <td>   
              <Modal
-                actions={<Button onClick={(event) => this.Put(list.id)} className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
+                actions={<Button onClick={(event) => this.handleUpdate(list.id)} className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
                 header={"Edit" + list.id}
-                trigger={<Button onClick={(event) => this.SetId(list.id)} className ='#f4ff81 lime accent-1' >Edit {this.state.PageType}</Button>}>
+                trigger={<Button className ='#f4ff81 lime accent-1' >Edit </Button>}>
                 <Row>
 
-                  <Input name="serialNo" s={6} label="serialNo" onChange={(event) => this.handleChange(event)} />
-                  <Input name="assetTag" s={6} label="assetTag" onChange={(event) => this.handleUpdateChange(list.id,event)}  />
-                  <Input name="battery" s={6} label="battery" onChange={(event) => this.handleUpdateChange(list.id,event)}  />
-                  <Input name="adapter" s={6} label="adapter" onChange={(event) => this.handleUpdateChange(list.id,event)}  />
-                  <Input name="name" s={6} label="name" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                  <Input name="assignedTo" s={6} label="assignedTo"onChange={(event) => this.handleUpdateChange(list.id,event)}  />     
-                  <Input name="poNo" s={6} label="poNo" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                  <Input name="drNo" s={6} label="drNo" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                  <Input name="siNo" s={6} label="siNo" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                  <Input name="macAddress" s={6} label="macAddress" onChange={(event) => this.handleUpdateChange(list.id,event)}  />
-                  <Input name="ipAddress" s={6} label="ipAddress" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                  <Input name="purchaseCost" s={6} label="purchaseCost" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                  <Input name="warranty" s={6} label="warranty" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                  <Input name="notes" s={6} label="notes" onChange={(event) => this.handleUpdateChange(list.id,event)} />
+               <form id ={"EditForm" + list.id}>
 
-                  <Input name="purchaseDate" s={6} label="purchaseDate" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                  <Input name="deliveryDate" s={6} label="deliveryDate" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                        
-                  <Input name="status" s={6} type='select' label="Status" defaultValue='0'>
+                  <Input name="serialNo" defaultValue={list.serialNo} s={6} label="serialNo"  />
+                  <Input name="assetTag" defaultValue={list.assetTag} s={6} label="assetTag"   />
+                  <Input name="battery" defaultValue={list.battery} s={6} label="battery"   />
+                  <Input name="adapter" defaultValue={list.adapter} s={6} label="adapter"   />
+                  <Input name="name" defaultValue={list.name} s={6} label="name" />
+                  <Input name="assignedTo" defaultValue={list.assignedTo} s={6} label="assignedTo"  />     
+                  <Input name="poNo" defaultValue={list.poNo} s={6} label="poNo"  />
+                  <Input name="drNo" defaultValue={list.drNo} s={6} label="drNo"  />
+                  <Input name="siNo" defaultValue={list.siNo} s={6} label="siNo"  />
+                  <Input name="macAddress" defaultValue={list.macAddress} s={6} label="macAddress"   />
+                  <Input name="ipAddress" defaultValue={list.ipAddress} s={6} label="ipAddress"  />
+                  <Input name="purchaseCost" defaultValue={list.purchaseCost} s={6} label="purchaseCost" />
+                  <Input name="warranty" defaultValue={list.warranty} s={6} label="warranty" />
+                  <Input name="notes" defaultValue={list.notes} s={6} label="notes"  />
+ 
+            
+                  <Input name='purchaseDate' s={6} defaultValue={list.purchaseDate} type='date' label="purchaseDate" />
+                  <Input name='deliveryDate' s={6} defaultValue={list.deliveryDate} type='date' label="deliveryDate"  />
+             
+                  <Input name="status" defaultValue={list.status} s={6} type='select' label="Status" defaultValue='0' >
                       <option value='0'></option>
                       <option value='1'>Available</option>
                       <option value='2'>Not Available</option>
@@ -264,9 +349,45 @@ export default class CommonComponent extends Component
                   {this.state.SuppliersDropDown}
                   {this.state.CategoriesDropDown}
 
+              </form>
+
+
                 </Row> 
             </Modal>
         </td>
+      }
+      else if(this.state.PageType == 'VideoCard' || this.state.PageType == 'Memory' || this.state.PageType == 'HardDisk')
+      {
+          tablemodal = <td>   
+          <Modal
+              actions={<Button onClick={(event) => this.handleUpdate(list.id)} className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
+              header={"Edit Item:" + list.id}
+              trigger={<Button className ='#f4ff81 lime accent-1' >Edit {this.state.PageType}</Button>}>
+            <form id ={"EditForm" + list.id}>
+              <Row>
+                  <Input name="size" defaultValue={list.size} type="email" label={this.state.PageType} s={12} />                         
+              </Row> 
+            </form>
+          </Modal>
+        </td>
+      }
+
+      else
+      {
+        tablemodal = <td>   
+        <Modal
+            actions={<Button onClick={(event) => this.handleUpdate(list.id)} className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
+            header={"Edit Item:" + list.id}
+            trigger={<Button className ='#f4ff81 lime accent-1' >Edit {this.state.PageType}</Button>}>
+          <form id ={"EditForm" + list.id}>
+            <Row>
+                <Input name="name" defaultValue={list.name} type="email" label={this.state.PageType} s={12} />                         
+            </Row> 
+          </form>
+        </Modal>
+      </td>
+
+      }
         
       tablebody.push(tablemodal);
 
@@ -282,9 +403,7 @@ export default class CommonComponent extends Component
                 <td>{table}</td>
             )}
             </tr>
-
-
-            
+          
           </tbody>  
         </Table>
       </div>
@@ -309,48 +428,71 @@ export default class CommonComponent extends Component
 
       if(this.state.PageType == 'Asset')
       {
+  
         tablemodal = list.list.map(list =>
           <td key={list.id}>   
             <Modal
-                actions={<Button onClick={(event) => this.Put()} className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
-                header={"Edit" + list.id}
-                trigger={<Button className ='#f4ff81 lime accent-1' >Edit {this.state.PageType}</Button>}>
+                actions={<Button onClick={(event) => this.handleUpdate(list.id)} className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
+                header={"Edit Item:" + list.id}
+                trigger={<Button  className ='#f4ff81 lime accent-1' >Edit </Button>}>
                 <Row>
+                
+                  <form id ={"EditForm" + list.id}>
 
-                  <Input name="serialNo" s={6} label="serialNo" onChange={(event) => this.handleChange(event)} />
-                  <Input name="assetTag" s={6} label="assetTag" onChange={(event) => this.handleUpdateChange(list.id,event)}  />
-                  <Input name="battery" s={6} label="battery" onChange={(event) => this.handleUpdateChange(list.id,event)}  />
-                  <Input name="adapter" s={6} label="adapter" onChange={(event) => this.handleUpdateChange(list.id,event)}  />
-                  <Input name="name" s={6} label="name" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                  <Input name="assignedTo" s={6} label="assignedTo"onChange={(event) => this.handleUpdateChange(list.id,event)}  />     
-                  <Input name="poNo" s={6} label="poNo" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                  <Input name="drNo" s={6} label="drNo" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                  <Input name="siNo" s={6} label="siNo" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                  <Input name="macAddress" s={6} label="macAddress" onChange={(event) => this.handleUpdateChange(list.id,event)}  />
-                  <Input name="ipAddress" s={6} label="ipAddress" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                  <Input name="purchaseCost" s={6} label="purchaseCost" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                  <Input name="warranty" s={6} label="warranty" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                  <Input name="notes" s={6} label="notes" onChange={(event) => this.handleUpdateChange(list.id,event)} />
+                    <Input name="serialNo" defaultValue={list.serialNo} s={6} label="serialNo" />
+                    <Input name="assetTag" defaultValue={list.assetTag} s={6} label="assetTag"  />
+                    <Input name="battery" defaultValue={list.battery} s={6} label="battery"   />
+                    <Input name="adapter" defaultValue={list.adapter} s={6} label="adapter"  />
+                    <Input name="name" defaultValue={list.name} s={6} label="name"  />
+                    <Input name="assignedTo" defaultValue={list.assignedTo} s={6} label="assignedTo"  />     
+                    <Input name="poNo" defaultValue={list.poNo} s={6} label="poNo"  />
+                    <Input name="drNo" defaultValue={list.drNo} s={6} label="drNo" />
+                    <Input name="siNo" defaultValue={list.siNo} s={6} label="siNo"  />
+                    <Input name="macAddress" defaultValue={list.macAddress} s={6} label="macAddress"   />
+                    <Input name="ipAddress" defaultValue={list.ipAddress} s={6} label="ipAddress" />
+                    <Input name="purchaseCost" defaultValue={list.purchaseCost} s={6} label="purchaseCost"  />
+                    <Input name="warranty" defaultValue={list.warranty} s={6} label="warranty"  />
+                    <Input name="notes" defaultValue={list.notes} s={6} label="notes"  />
+                
+                    <Input name='purchaseDate' s={6} defaultValue={list.purchaseDate} type='date' label="purchaseDate" />
+                    <Input name='deliveryDate' s={6} defaultValue={list.deliveryDate} type='date' label="deliveryDate"  />
+                         
+                    <Input name="status" defaultValue={list.status} s={6} type='select' label="Status" defaultValue='0'>
+                        <option value='0'></option>
+                        <option value='1'>Available</option>
+                        <option value='2'>Not Available</option>
+                    </Input>
 
-                  <Input name="purchaseDate" s={6} label="purchaseDate" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                  <Input name="deliveryDate" s={6} label="deliveryDate" onChange={(event) => this.handleUpdateChange(list.id,event)} />
-                        
-                  <Input name="status" s={6} type='select' label="Status" defaultValue='0'>
-                      <option value='0'></option>
-                      <option value='1'>Available</option>
-                      <option value='2'>Not Available</option>
-                  </Input>
+                    {this.state.ManufacturerDropDown}
+                    {this.state.ModelsDropDown}
+                    {this.state.HardDiskDropDown}
+                    {this.state.ProcessorDropDown}
+                    {this.state.MemoryDropDown}
+                    {this.state.VideoCardDropDown}
+                    {this.state.SuppliersDropDown}
+                    {this.state.CategoriesDropDown}
 
-                  {this.state.ManufacturerDropDown}
-                  {this.state.ModelsDropDown}
-                  {this.state.HardDiskDropDown}
-                  {this.state.ProcessorDropDown}
-                  {this.state.MemoryDropDown}
-                  {this.state.VideoCardDropDown}
-                  {this.state.SuppliersDropDown}
-                  {this.state.CategoriesDropDown}
+                  </form>
 
                 </Row> 
+            </Modal>
+          </td>
+        );
+      }
+      
+      else if(this.state.PageType == 'VideoCard' || this.state.PageType == 'Memory' || this.state.PageType == 'HardDisk')
+      {
+        tablemodal = list.list.map(list =>
+          <td key={list.id}>   
+            <Modal
+                actions={<Button onClick={(event) => this.handleUpdate(list.id)} className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
+                header={"Edit Item:" + list.id}
+                trigger={<Button className ='#f4ff81 lime accent-1' >Edit {this.state.PageType}</Button>}>
+              <form id ={"EditForm" + list.id}>
+                <Row>
+                    <Input name="size" defaultValue={list.size} type="email" label={this.state.PageType} s={12} />                         
+                </Row> 
+              </form>
             </Modal>
           </td>
         );
@@ -361,12 +503,14 @@ export default class CommonComponent extends Component
         tablemodal = list.list.map(list =>
           <td key={list.id}>   
             <Modal
-                actions={<Button onClick={(event) => this.Put()} className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
-                header={"Edit" + list.id}
+                actions={<Button onClick={(event) => this.handleUpdate(list.id)} className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
+                header={"Edit Item:" + list.id}
                 trigger={<Button className ='#f4ff81 lime accent-1' >Edit {this.state.PageType}</Button>}>
+              <form id ={"EditForm" + list.id}>
                 <Row>
-                    <Input name="name" type="email" label={this.state.PageType} s={12} onChange={(event) => this.handleUpdateChange(event,list.id)}/>                         
+                    <Input name="name" defaultValue={list.name} type="email" label={this.state.PageType} s={12} />                         
                 </Row> 
+              </form>
             </Modal>
           </td>
         );

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 // import Common from './CommonComponent';
 import {Table, ProgressBar, Pagination, Modal, Button, Row , Input , Icon,  Col} from 'react-materialize'
 

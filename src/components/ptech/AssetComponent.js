@@ -1,6 +1,6 @@
-import React, { Component } from 'react'
+import React from 'react'
 import Common from './CommonComponent';
-import {ProgressBar, Pagination, Modal, Button, Row , Input , Icon,  Col} from 'react-materialize'
+import {ProgressBar, Pagination, Modal, Button, Row , Input , Icon } from 'react-materialize'
 
 export default class AssetComponent extends Common {
 
@@ -39,36 +39,6 @@ export default class AssetComponent extends Common {
         },
         postState : 
         {
-            id:'',
-            supplierId: '',
-            modelId: '',
-            processorId: '',
-            memoryId: '',
-            videoCardId: '',
-            hardDiskId: '',
-            manufacturerId: '',
-            categoryId: '',
-            serialNo: '',
-            assetTag: '',
-            battery: '',
-            adapter: '',
-            name: '',
-            assignedTo: '',
-            deliveryDate: '',
-            poNo: '',
-            drNo: '',
-            siNo: '',
-            macAddress: '',
-            ipAddress: '',
-            status: '',
-            purchaseDate: '',
-            purchaseCost: '',
-            warranty: '',
-            notes: ''
-        },
-        putState : 
-        {
-            id:'',
             supplierId: '',
             modelId: '',
             processorId: '',
@@ -98,11 +68,12 @@ export default class AssetComponent extends Common {
       };
 
     }
+    
 
     componentDidMount()
     {   
       super.GetDropDown(this.state.selectAPI);
-      super.GetWithPager(); 
+      super.GetWithPager();
     }
 
     handleChange = (event) =>
@@ -110,10 +81,21 @@ export default class AssetComponent extends Common {
         this.state.postState[[event.target.name]] = event.target.value;   
     }
 
-    handleUpdateChange = (Uid, event) =>
+    showErrorModal = () => {
+
+      // $('#ErrorModal').modal('open');
+    }
+
+    
+    handleUpdate = (_formID) =>
     {     
-        this.state.putState['id'] = Uid;
-        this.state.putState[[event.target.name]] = event.target.value;   
+        var properties = Object.keys(this.state.postState);
+        for(var property = 0; property < properties.length; property++)
+        {
+           this.state.postState[properties[property]] = document.getElementById("EditForm" +_formID).elements[properties[property]].value
+        }
+
+        this.Put(_formID);
     }
 
     render() {
@@ -131,7 +113,23 @@ export default class AssetComponent extends Common {
           
         <Row>
            <Input s={3} name="s_processorID" label={this.state.PageType + ' ID'} validate onChange={(event) => this.GetWithID(event)}><Icon>search</Icon></Input> 
+           <Input s={3} name="s_keyword" label='Keyword' validate onChange={(event) => this.GetWithKeyword(event)}><Icon>search</Icon></Input> 
         </Row> 
+
+            {/* <Modal
+            id='ErrorModal'
+            actions={<Button className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
+            header= {'Error'}
+            trigger={<Button>Add {this.state.PageType}</Button>}
+            modalOptions={ { dismissible: true, inDuration: 3 } }
+            > */}
+
+               <Row>
+               {this.state.ErrorMessage}
+               </Row> 
+
+           {/* </Modal> */}
+
 
          {this.state.newcontents}
     
@@ -156,8 +154,9 @@ export default class AssetComponent extends Common {
             <Input name="purchaseCost" s={6} label="purchaseCost" onChange={(event) => this.handleChange(event)} />
             <Input name="warranty" s={6} label="warranty" onChange={(event) => this.handleChange(event)} />
             <Input name="notes" s={6} label="notes"  onChange={(event) => this.handleChange(event)} />
-            <Input name="purchaseDate" s={6} label="purchaseDate"  onChange={(event) => this.handleChange(event)} />
-            <Input name="deliveryDate" s={6} label="deliveryDate"  onChange={(event) => this.handleChange(event)} />
+
+            <Input name='purchaseDate' s={6} type='date' label="purchaseDate" onChange={(event) => this.handleChange(event)}  />
+            <Input name='deliveryDate' s={6} type='date' label="deliveryDate" onChange={(event) => this.handleChange(event)}  />
             
             <Input name="status" s={6} type='select' label="Status" defaultValue='0' onChange={(event) => this.handleChange(event)}>
                 <option value='0'></option>

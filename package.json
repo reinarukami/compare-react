@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "immutability-helper": "^2.7.1",
     "materialize-css": "^1.0.0-rc.2",
     "mobx-react": "^5.2.3",
     "react": "^16.4.1",

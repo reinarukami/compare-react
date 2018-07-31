@@ -1,6 +1,6 @@
-import React, { Component } from 'react'
+import React from 'react'
 import Common from './CommonComponent';
-import {Table, ProgressBar, Pagination, Modal, Button, Row , Input , Icon,  Col} from 'react-materialize'
+import {ProgressBar, Pagination, Modal, Button, Row , Input , Icon} from 'react-materialize'
 
 export default class ModelComponent extends Common {
 
@@ -34,11 +34,17 @@ export default class ModelComponent extends Common {
       this.state.postState.name = event.target.value;
     }
 
-    handleUpdateChange = (event, id) =>
+    handleUpdate = (_formID) =>
     {     
-      this.state.putState.id = id;
-      this.state.putState.name = event.target.value;
+      var properties = Object.keys(this.state.postState);
+      for(var property = 0; property < properties.length; property++)
+      {
+         this.state.postState[properties[property]] = document.getElementById("EditForm" +_formID).elements[properties[property]].value
+      }
+
+      this.Put(_formID);
     }
+
 
     render() {
     
@@ -56,7 +62,8 @@ export default class ModelComponent extends Common {
         <Row>
            <Input s={3} name="s_processorID" label={this.state.PageType + ' ID'} validate onChange={(event) => this.GetWithID(event)}><Icon>search</Icon></Input> 
         </Row> 
-
+    
+          {this.state.ErrorMessage}
           {this.state.newcontents}
 
         <br/>
