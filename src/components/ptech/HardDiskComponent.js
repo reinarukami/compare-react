@@ -1,6 +1,6 @@
 import React from 'react'
 import Common from './CommonComponent';
-import {ProgressBar, Pagination, Modal, Button, Row , Input , Icon,  Col} from 'react-materialize'
+import {Pagination, Modal, Button, Row , Input , Icon} from 'react-materialize'
 
 export default class HardDiskComponent extends Common {
 
@@ -46,23 +46,17 @@ export default class HardDiskComponent extends Common {
     }
 
     render() {
-    
-      let contents = this.state.loading
-        ? <center><Row s={3}>
-        <ProgressBar />
-      </Row></center>
-        : ''
+  
         
       return (
         <div className="container">
    
-          {contents}
-          
+
         <Row>
            <Input s={3} name="s_processorID" label={this.state.PageType + ' ID'} validate onChange={(event) => this.GetWithID(event)}><Icon>search</Icon></Input> 
         </Row> 
 
-          {this.state.ErrorMessage}
+          {this.state.Message}
           {this.state.newcontents}
 
         <br/>

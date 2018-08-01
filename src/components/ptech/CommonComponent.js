@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import './Table.css';
-import {Table, ProgressBar, Pagination, Modal, Button, Row , Input , Icon, option} from 'react-materialize'
+import {Table, Modal, Button, Row , Input , Icon} from 'react-materialize'
 
 export default class CommonComponent extends Component 
 {
@@ -10,7 +10,7 @@ export default class CommonComponent extends Component
 
       this.state =
       {
-        ErrorMessage:'',
+        Message:'',
       }
       this.GetWithPager = this.GetWithPager.bind(this);
       this.GetAll = this.GetAll.bind(this);
@@ -23,17 +23,51 @@ export default class CommonComponent extends Component
 
     MapErrorMessage = (Error) => 
     {
-        if(Error.length != 0)
+        if(Error.length !== 0)
         {
+
+          var error = Error.map(Msg =>
+            <p key={Msg}><font color="white">{Msg} </font></p>
+           );
 
           return (    
 
-            Error.map(Msg =>
-              <p key={Msg}>{Msg}</p>
-             )
-
+            <div className="card-panel b71c1c red darken-4">{error}</div>
+       
             );                     
         }
+    }
+
+    SetLoader = () => 
+    {
+      this.setState({newcontents:<center><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></center>});  
+    }
+
+    Put = (id) =>
+    {
+      this.state.postState.id === id;
+      fetch(this.state.link + id , {method:'PUT', headers:{ 'Accept': 'application/json', 'Content-Type':'application/json'}, body:JSON.stringify(this.state.postState)})
+      .then(response => response.json())
+      .then(data =>{
+        if(data.success === true)
+        {
+          this.setState({
+            Message : <div class="card-panel teal lighten-2"> <p>Success executed the operation</p> </div>
+          })
+          this.PageStatus(this.state); 
+          delete this.state.postState.id;
+        }
+        else
+        {
+          this.setState({
+             Message : this.MapErrorMessage(data.errorMessages)
+          })
+          delete this.state.postState.id;
+          this.showErrorModal();
+         
+        }
+      })
+      .catch(error => console.error('Fetch Error =\n', error));
     }
 
     Post = () =>
@@ -41,18 +75,17 @@ export default class CommonComponent extends Component
       fetch(this.state.link , {method:'POST', headers:{ 'Accept': 'application/json', 'Content-Type':'application/json'}, body:JSON.stringify(this.state.postState)})
       .then(response => response.json())
       .then(data =>{
-        if(data.success == true)
+        if(data.success === true)
         {
         this.PageStatus(this.state); 
           this.setState({
-            ErrorMessage : <p>Success executed the operation</p>
+            Message : <div class="card-panel teal lighten-2"> <p>Success executed the operation</p> </div>
           })
         }
         else
         {
           this.setState({
-             ErrorMessage : this.MapErrorMessage(data.errorMessages),
-             error:true
+             Message : this.MapErrorMessage(data.errorMessages),
           })
          
         }
@@ -61,164 +94,9 @@ export default class CommonComponent extends Component
       .catch(error => console.error('Fetch Error =\n', error));
     }
 
-    GetWithID = (event) => 
-    {
-        if(event.target.value == '')
-        {
-          this.PageStatus(this.state);
-        }
-        else
-        {
-        fetch(this.state.link + event.target.value , {method:'get'})
-        .then(response => response.json())
-        .then(data => {
-          if(data.success != false)
-          {
-          this.setState({ loading: false, newcontents: this.renderTablebyID(data)});  
-          }
-        });
-      }
-    }
-
-    GetWithKeyword = (event) => 
-    {
-        if(event.target.value == '')
-        {
-          this.PageStatus(this.state);
-        }
-        else
-        {
-        fetch(this.state.link + event.target.value , {method:'get'})
-        .then(response => response.json())
-        .then(data => {
-          if(data.success != false)
-          {
-          this.setState({ loading: false, newcontents: this.renderTablebyID(data)});  
-          }
-        });
-      }
-    }
-
-    GetWithPager(callback)
-    {
-        // V2
-        // fetch(this.state.link + '?CurrentPage=' + this.state.activePage  , {method:'get'})
-        // .then(response => response.json())
-        // .then(data => callback(data))
-        
-        fetch(this.state.link + '?CurrentPage=' + this.state.activePage  , {method:'get'})
-        .then(response => response.json())
-        .then(data => {
-          // V2
-          // return data;
-          this.setState({ listWithPager: data, loading: false,  newcontents: this.renderTable(data)});  
-        }).catch(error => {
-          this.setState({loading: false , newcontents: 'No Record Found'})
-       });
-    
-    }
-
-    SetDropdownTemplate=(data, nameOf)=>{
-
-      var accesskey = Object.keys(data.list[0]);
-
-      if(accesskey[1] == "name")
-      {
-        
-        return (    
-          <Input s={6} name={nameOf} type='select' defaultValue='0' label={nameOf} onChange={(event) => this.handleChange(event)}>   
-                <option value='0'></option>   
-              {data.list.map(table =>
-                <option value={table.id}>{table.name}</option>
-              )}
-          </Input>
-        );
-      }
-
-      else
-      {
-        return (    
-          <Input s={6} name={nameOf} type='select' defaultValue='0' label={nameOf} onChange={(event) => this.handleChange(event)}>      
-                <option value='0'></option>   
-              {data.list.map(table =>
-                <option value={table.id}>{table.size}</option>
-              )}
-          </Input>
-        );
-      }
-    }
-
-    GetDropDown(apilinks)
-    {
-      
-     fetch(apilinks.Manufacturer + '?ShowAll=true' , {method:'get'})
-      .then(response => response.json())
-      .then(data => {
-          this.setState({ ManufacturerDropDown: this.SetDropdownTemplate(data, 'manufacturerId'), loading: false});  
-      }).catch(error => {
-        this.setState({loading: false , newcontents: 'No Record Found'})
-      });
-      
-      fetch(apilinks.Models + '?ShowAll=true' , {method:'get'})
-      .then(response => response.json())
-      .then(data => {
-          this.setState({ ModelsDropDown: this.SetDropdownTemplate(data, 'modelId'), loading: false});  
-      }).catch(error => {
-        this.setState({loading: false , newcontents: 'No Record Found'})
-      });
-
-      fetch(apilinks.HardDisk + '?ShowAll=true' , {method:'get'})
-      .then(response => response.json())
-      .then(data => {
-          this.setState({ HardDiskDropDown: this.SetDropdownTemplate(data, 'hardDiskId'), loading: false});  
-      }).catch(error => {
-        this.setState({loading: false , newcontents: 'No Record Found'})
-      });
-
-      fetch(apilinks.Processor + '?ShowAll=true' , {method:'get'})
-      .then(response => response.json())
-      .then(data => {
-          this.setState({ ProcessorDropDown: this.SetDropdownTemplate(data,'processorId'), loading: false});  
-      }).catch(error => {
-        this.setState({loading: false , newcontents: 'No Record Found'})
-      });
-
-      fetch(apilinks.Memory + '?ShowAll=true' , {method:'get'})
-      .then(response => response.json())
-      .then(data => {
-          this.setState({ MemoryDropDown: this.SetDropdownTemplate(data, 'memoryId'), loading: false});  
-      }).catch(error => {
-        this.setState({loading: false , newcontents: 'No Record Found'})
-      });
-
-      fetch(apilinks.VideoCard + '?ShowAll=true' , {method:'get'})
-      .then(response => response.json())
-      .then(data => {
-          this.setState({ VideoCardDropDown: this.SetDropdownTemplate(data, 'videoCardId'), loading: false});  
-      }).catch(error => {
-        this.setState({loading: false , newcontents: 'No Record Found'})
-      });
-
-      fetch(apilinks.Suppliers + '?ShowAll=true' , {method:'get'})
-      .then(response => response.json())
-      .then(data => {
-          this.setState({ SuppliersDropDown: this.SetDropdownTemplate(data , 'supplierId'), loading: false});  
-      }).catch(error => {
-        this.setState({loading: false , newcontents: 'No Record Found'})
-      });
-
-      fetch(apilinks.Categories + '?ShowAll=true' , {method:'get'})
-      .then(response => response.json())
-      .then(data => {
-          this.setState({ CategoriesDropDown: this.SetDropdownTemplate(data, 'categoryId'), loading: false});  
-      }).catch(error => {
-        this.setState({loading: false , newcontents: 'No Record Found'})
-      });
-
-    }
-
     GetAll()
     {
+      this.SetLoader();  
         fetch(this.state.link + '?ShowAll=true' , {method:'get'})
         .then(response => response.json())
         .then(data => {
@@ -248,6 +126,7 @@ export default class CommonComponent extends Component
 
     FetchPage = (pagestat) =>
     {
+        this.SetLoader();  
         this.setState({
           activePage : pagestat
         })
@@ -258,34 +137,169 @@ export default class CommonComponent extends Component
         });
     }
 
-    Put = (id) =>
+
+    GetWithID = (event) => 
     {
-      this.state.postState.id = id;
-      fetch(this.state.link + id , {method:'PUT', headers:{ 'Accept': 'application/json', 'Content-Type':'application/json'}, body:JSON.stringify(this.state.postState)})
-      .then(response => response.json())
-      .then(data =>{
-        if(data.success == true)
+        this.SetLoader();  
+        if(event.target.value === '')
         {
-          this.setState({
-            ErrorMessage : <p>Success executed the operation</p>
-          })
-          this.PageStatus(this.state); 
-          delete this.state.postState.id;
+          this.PageStatus(this.state);
         }
         else
         {
-          this.setState({
-             ErrorMessage : this.MapErrorMessage(data.errorMessages)
-          })
-          delete this.state.postState.id;
-          this.showErrorModal();
-         
-        }
-      })
-      .catch(error => console.error('Fetch Error =\n', error));
+        fetch(this.state.link + event.target.value , {method:'get'})
+        .then(response => response.json())
+        .then(data => {
+          if(data.success !== false)
+          {
+          this.setState({ loading: false, newcontents: this.renderTablebyID(data)});  
+          }
+          else
+          {
+             this.setState({newcontents: 'No record Found'})
+          }
+        });
+      }
     }
 
-  
+    GetWithKeyword = (event) => 
+    {
+        this.SetLoader();  
+        if(event.target.value == '')
+        {
+          this.PageStatus(this.state);
+        }
+        else
+        {
+        fetch(this.state.link + '?Keyword=' + event.target.value , {method:'get'})
+        .then(response => response.json())
+        .then(data => {
+          if(data.success != false && data.list.length != 0)
+          {
+             this.setState({listWithPager: data, loading: false,  newcontents: this.renderTable(data)});  
+          }
+          else
+          {
+             this.setState({newcontents: 'No record Found'})
+          }
+        });
+      }
+    }
+
+    GetWithPager(callback)
+    {
+        this.SetLoader();  
+        fetch(this.state.link + '?CurrentPage=' + this.state.activePage  , {method:'get'})
+        .then(response => response.json())
+        .then(data => {
+          // V2
+          // return data;
+          this.setState({ listWithPager: data, loading: false,  newcontents: this.renderTable(data)});  
+        }).catch(error => {
+          this.setState({loading: false , newcontents: 'No Record Found'})
+       });
+    
+    }
+
+    GetDropDown(apilinks)
+    {
+      
+     fetch(apilinks.Manufacturer + '?ShowAll=true' , {method:'get'})
+      .then(response => response.json())
+      .then(data => {
+          this.setState({ ManufacturerDropDown: this.SetDropdownTemplate(data, 'manufacturerId'), loading: false});  
+      }).catch(error => {
+        this.setState({loading: false , Message: 'No Record Found'})
+      });
+      
+      fetch(apilinks.Models + '?ShowAll=true' , {method:'get'})
+      .then(response => response.json())
+      .then(data => {
+          this.setState({ ModelsDropDown: this.SetDropdownTemplate(data, 'modelId'), loading: false});  
+      }).catch(error => {
+        this.setState({loading: false , Message: 'No Record Found'})
+      });
+
+      fetch(apilinks.HardDisk + '?ShowAll=true' , {method:'get'})
+      .then(response => response.json())
+      .then(data => {
+          this.setState({ HardDiskDropDown: this.SetDropdownTemplate(data, 'hardDiskId'), loading: false});  
+      }).catch(error => {
+        this.setState({loading: false , Message: 'No Record Found'})
+      });
+
+      fetch(apilinks.Processor + '?ShowAll=true' , {method:'get'})
+      .then(response => response.json())
+      .then(data => {
+          this.setState({ ProcessorDropDown: this.SetDropdownTemplate(data,'processorId'), loading: false});  
+      }).catch(error => {
+        this.setState({loading: false , Message: 'No Record Found'})
+      });
+
+      fetch(apilinks.Memory + '?ShowAll=true' , {method:'get'})
+      .then(response => response.json())
+      .then(data => {
+          this.setState({ MemoryDropDown: this.SetDropdownTemplate(data, 'memoryId'), loading: false});  
+      }).catch(error => {
+        this.setState({loading: false , Message: 'No Record Found'})
+      });
+
+      fetch(apilinks.VideoCard + '?ShowAll=true' , {method:'get'})
+      .then(response => response.json())
+      .then(data => {
+          this.setState({ VideoCardDropDown: this.SetDropdownTemplate(data, 'videoCardId'), loading: false});  
+      }).catch(error => {
+        this.setState({loading: false , Message: 'No Record Found'})
+      });
+
+      fetch(apilinks.Suppliers + '?ShowAll=true' , {method:'get'})
+      .then(response => response.json())
+      .then(data => {
+          this.setState({ SuppliersDropDown: this.SetDropdownTemplate(data , 'supplierId'), loading: false});  
+      }).catch(error => {
+        this.setState({loading: false , Message: 'No Record Found'})
+      });
+
+      fetch(apilinks.Categories + '?ShowAll=true' , {method:'get'})
+      .then(response => response.json())
+      .then(data => {
+          this.setState({ CategoriesDropDown: this.SetDropdownTemplate(data, 'categoryId'), loading: false});  
+      }).catch(error => {
+        this.setState({loading: false , Message: 'No Record Found'})
+      });
+
+    }
+
+    SetDropdownTemplate=(data, nameOf)=>
+    {
+
+      var accesskey = Object.keys(data.list[0]);
+
+      if(accesskey[1] == "name")
+      {
+        
+        return (    
+          <Input s={6} name={nameOf} type='select' defaultValue='0' label={nameOf} onChange={(event) => this.handleChange(event)}>   
+                <option value='0'></option>   
+              {data.list.map(table =>
+                <option value={table.id}>{table.name}</option>
+              )}
+          </Input>
+        );
+      }
+
+      else
+      {
+        return (    
+          <Input s={6} name={nameOf} type='select' defaultValue='0' label={nameOf} onChange={(event) => this.handleChange(event)}>      
+                <option value='0'></option>   
+              {data.list.map(table =>
+                <option value={table.id}>{table.size}</option>
+              )}
+          </Input>
+        );
+      }
+    }
 
     renderTablebyID(list) 
     {
@@ -331,8 +345,8 @@ export default class CommonComponent extends Component
                   <Input name="notes" defaultValue={list.notes} s={6} label="notes"  />
  
             
-                  <Input name='purchaseDate' s={6} defaultValue={list.purchaseDate} type='date' label="purchaseDate" />
-                  <Input name='deliveryDate' s={6} defaultValue={list.deliveryDate} type='date' label="deliveryDate"  />
+                  <Input name='purchaseDate' s={6} value={list.purchaseDate} type='date' label="purchaseDate" />
+                  <Input name='deliveryDate' s={6} value={list.deliveryDate} type='date' label="deliveryDate"  />
              
                   <Input name="status" defaultValue={list.status} s={6} type='select' label="Status" defaultValue='0' >
                       <option value='0'></option>

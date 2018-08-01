@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Collapsible, CollapsibleItem, icon} from 'react-materialize';
+import {Collapsible, CollapsibleItem} from 'react-materialize';
 
 const element1 = (
 <Collapsible>

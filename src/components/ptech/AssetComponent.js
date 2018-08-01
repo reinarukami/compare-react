@@ -1,6 +1,6 @@
 import React from 'react'
 import Common from './CommonComponent';
-import {ProgressBar, Pagination, Modal, Button, Row , Input , Icon } from 'react-materialize'
+import {Pagination, Modal, Button, Row , Input , Icon} from 'react-materialize'
 
 export default class AssetComponent extends Common {
 
@@ -99,17 +99,9 @@ export default class AssetComponent extends Common {
     }
 
     render() {
-    
-      let contents = this.state.loading
-        ? <center><Row s={3}>
-        <ProgressBar />
-      </Row></center>
-        : ''
         
       return (
         <div className="container">
-   
-          {contents}
           
         <Row>
            <Input s={3} name="s_processorID" label={this.state.PageType + ' ID'} validate onChange={(event) => this.GetWithID(event)}><Icon>search</Icon></Input> 
@@ -124,15 +116,9 @@ export default class AssetComponent extends Common {
             modalOptions={ { dismissible: true, inDuration: 3 } }
             > */}
 
-               <Row>
-               {this.state.ErrorMessage}
-               </Row> 
-
-           {/* </Modal> */}
-
-
-         {this.state.newcontents}
-    
+        {this.state.Message}
+        {this.state.newcontents}
+   
         <br/>
 
         <Modal
@@ -164,6 +150,7 @@ export default class AssetComponent extends Common {
                 <option value='2'>Not Available</option>
              </Input>
 
+              
             {this.state.ManufacturerDropDown}
             {this.state.ModelsDropDown}
             {this.state.HardDiskDropDown}

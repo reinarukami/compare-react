@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Navbar, Icon, Dropdown, Button, NavItem} from 'react-materialize';
+import {Navbar, Dropdown, Button} from 'react-materialize';
 import { Link } from 'react-router-dom';
 
 class Header extends Component {
@@ -27,14 +27,15 @@ class Header extends Component {
                    <li><Link to="/ptech-processor">Processor</Link></li>
 
                    
-
-   
              </Dropdown>
-             </li>     
+             </li>
+             <li>
+
+             </li>
    
            </ul>
    
-           </Navbar>
+      </Navbar>
 
       </div>
     );

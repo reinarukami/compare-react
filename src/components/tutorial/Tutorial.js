@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {Button} from 'react-materialize';
-import {Redirect, Route, withRouter} from 'react-router-dom';
+import {Redirect, Route} from 'react-router-dom';
 
 export default class Tutorial extends Component {
 
