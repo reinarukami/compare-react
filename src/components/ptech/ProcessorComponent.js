@@ -24,6 +24,11 @@ export default class ModelComponent extends Common {
 
     }
 
+    componentWillMount()
+    {
+      super.CheckSession();
+    }
+
     componentDidMount()
     {   
       super.GetWithPager();

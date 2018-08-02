@@ -1,17 +1,27 @@
-import React, { Component } from 'react'
-import './Table.css';
+import React, { Component } from 'react';
+import './Main.css';
+import Cookies from 'universal-cookie';
 import {Table, Modal, Button, Row , Input , Icon} from 'react-materialize'
+import PropTypes from 'prop-types';
 
 export default class CommonComponent extends Component 
 {
-    constructor(props)
+    static contextTypes = {router:PropTypes.object}
+
+    constructor(props, context)
     {
+
+      const cookies = new Cookies();
+
       super(props);
 
       this.state =
       {
-        Message:'',
+        Authorization:'',
+        Message:''
       }
+
+      this.CheckSession = this.CheckSession.bind(this);
       this.GetWithPager = this.GetWithPager.bind(this);
       this.GetAll = this.GetAll.bind(this);
       this.GetDropDown = this.GetDropDown.bind(this);
@@ -45,8 +55,8 @@ export default class CommonComponent extends Component
 
     Put = (id) =>
     {
-      this.state.postState.id === id;
-      fetch(this.state.link + id , {method:'PUT', headers:{ 'Accept': 'application/json', 'Content-Type':'application/json'}, body:JSON.stringify(this.state.postState)})
+      this.state.postState.id = id;
+      fetch(this.state.link + id , {method:'PUT', headers:{'Authorization': this.state.Authorization, 'Accept': 'application/json', 'Content-Type':'application/json'}, body:JSON.stringify(this.state.postState)})
       .then(response => response.json())
       .then(data =>{
         if(data.success === true)
@@ -72,7 +82,7 @@ export default class CommonComponent extends Component
 
     Post = () =>
     {
-      fetch(this.state.link , {method:'POST', headers:{ 'Accept': 'application/json', 'Content-Type':'application/json'}, body:JSON.stringify(this.state.postState)})
+      fetch(this.state.link , {method:'POST', headers:{'Authorization': this.state.Authorization, 'Accept': 'application/json', 'Content-Type':'application/json'}, body:JSON.stringify(this.state.postState)})
       .then(response => response.json())
       .then(data =>{
         if(data.success === true)
@@ -96,14 +106,26 @@ export default class CommonComponent extends Component
 
     GetAll()
     {
-      this.SetLoader();  
-        fetch(this.state.link + '?ShowAll=true' , {method:'get'})
+      this.SetLoader();
+      if(this.state.s_keyword =='')
+      {  
+        fetch(this.state.link + '?ShowAll=true' , {method:'get', headers:{'Authorization': this.state.Authorization}})
         .then(response => response.json())
         .then(data => {
-            this.setState({ list: data, loading: false , newcontents: this.renderTable(data, this)});  
+            this.setState({ list: data, PagerClass:'HidePager',loading: false , newcontents: this.renderTable(data, this)});  
         }).catch(error => {
           this.setState({loading: false , newcontents: 'No Record Found'})
        });
+      }
+      else{
+        fetch(this.state.link + '?Keyword=' + this.state.s_keyword + '&ShowAll=true' , {method:'get', headers:{'Authorization': this.state.Authorization}})
+        .then(response => response.json())
+        .then(data => {
+            this.setState({ list: data, PagerClass:'HidePager',loading: false , newcontents: this.renderTable(data, this)});  
+        }).catch(error => {
+          this.setState({loading: false , newcontents: 'No Record Found'})
+       });
+      }
     }
   
     TogglePage(event)
@@ -120,7 +142,7 @@ export default class CommonComponent extends Component
        }
        else
        {
-        this.GetWithPager(this.state._activePage);
+        this.GetWithPager();
        }
     }
 
@@ -128,13 +150,26 @@ export default class CommonComponent extends Component
     {
         this.SetLoader();  
         this.setState({
-          activePage : pagestat
+          _activePage : pagestat
         })
-        fetch(this.state.link + '?CurrentPage=' + pagestat , {method:'get'})
+        if(this.state.s_keyword == '')
+        {
+        fetch(this.state.link + '?CurrentPage=' + pagestat , {method:'get',  headers:{'Authorization': this.state.Authorization}})
         .then(response => response.json())
         .then(data => {
           this.setState({ listWithPager: data, loading: false, newcontents: this.renderTable(data, this)});  
         });
+       }
+       else
+       {
+        {
+          fetch(this.state.link + '?CurrentPage=' + pagestat + '&Keyword=' + this.state.s_keyword , {method:'get',  headers:{'Authorization': this.state.Authorization}})
+          .then(response => response.json())
+          .then(data => {
+            this.setState({ listWithPager: data, loading: false, newcontents: this.renderTable(data, this)});  
+          });
+         }
+       }
     }
 
 
@@ -147,7 +182,7 @@ export default class CommonComponent extends Component
         }
         else
         {
-        fetch(this.state.link + event.target.value , {method:'get'})
+        fetch(this.state.link + event.target.value , {method:'get',  headers:{'Authorization': this.state.Authorization}})
         .then(response => response.json())
         .then(data => {
           if(data.success !== false)
@@ -165,36 +200,45 @@ export default class CommonComponent extends Component
     GetWithKeyword = (event) => 
     {
         this.SetLoader();  
+        this.state.s_keyword = event.target.value;
+
         if(event.target.value == '')
         {
+          this.setState({
+            _activePage : 1
+          })       
           this.PageStatus(this.state);
         }
+
         else
         {
-        fetch(this.state.link + '?Keyword=' + event.target.value , {method:'get'})
-        .then(response => response.json())
-        .then(data => {
-          if(data.success != false && data.list.length != 0)
-          {
-             this.setState({listWithPager: data, loading: false,  newcontents: this.renderTable(data)});  
-          }
-          else
-          {
-             this.setState({newcontents: 'No record Found'})
-          }
+          this.setState({
+            _activePage : 1
+          })              
+           fetch(this.state.link + '?Keyword=' + event.target.value , {method:'get',  headers:{'Authorization': this.state.Authorization}})
+          .then(response => response.json())
+          .then(data => {
+            if(data.success != false && data.list.length != 0)
+            {
+              this.setState({listWithPager: data, loading: false,  newcontents: this.renderTable(data)});  
+            }
+            else
+            {
+              this.setState({newcontents: 'No record Found'})
+            }
         });
       }
     }
 
-    GetWithPager(callback)
+    GetWithPager()
     {
         this.SetLoader();  
-        fetch(this.state.link + '?CurrentPage=' + this.state.activePage  , {method:'get'})
+        fetch(this.state.link  , {method:'get', headers:{'Authorization': this.state.Authorization}}, )
         .then(response => response.json())
         .then(data => {
           // V2
           // return data;
-          this.setState({ listWithPager: data, loading: false,  newcontents: this.renderTable(data)});  
+          this.setState({ listWithPager: data, PagerClass:'', loading: false,  newcontents: this.renderTable(data)});  
         }).catch(error => {
           this.setState({loading: false , newcontents: 'No Record Found'})
        });
@@ -204,7 +248,7 @@ export default class CommonComponent extends Component
     GetDropDown(apilinks)
     {
       
-     fetch(apilinks.Manufacturer + '?ShowAll=true' , {method:'get'})
+     fetch(apilinks.Manufacturer + '?ShowAll=true' , {method:'get' , headers:{'Authorization': this.state.Authorization}})
       .then(response => response.json())
       .then(data => {
           this.setState({ ManufacturerDropDown: this.SetDropdownTemplate(data, 'manufacturerId'), loading: false});  
@@ -212,7 +256,7 @@ export default class CommonComponent extends Component
         this.setState({loading: false , Message: 'No Record Found'})
       });
       
-      fetch(apilinks.Models + '?ShowAll=true' , {method:'get'})
+      fetch(apilinks.Models + '?ShowAll=true' , {method:'get' , headers:{'Authorization': this.state.Authorization}})
       .then(response => response.json())
       .then(data => {
           this.setState({ ModelsDropDown: this.SetDropdownTemplate(data, 'modelId'), loading: false});  
@@ -220,7 +264,7 @@ export default class CommonComponent extends Component
         this.setState({loading: false , Message: 'No Record Found'})
       });
 
-      fetch(apilinks.HardDisk + '?ShowAll=true' , {method:'get'})
+      fetch(apilinks.HardDisk + '?ShowAll=true' , {method:'get' , headers:{'Authorization': this.state.Authorization}})
       .then(response => response.json())
       .then(data => {
           this.setState({ HardDiskDropDown: this.SetDropdownTemplate(data, 'hardDiskId'), loading: false});  
@@ -228,7 +272,7 @@ export default class CommonComponent extends Component
         this.setState({loading: false , Message: 'No Record Found'})
       });
 
-      fetch(apilinks.Processor + '?ShowAll=true' , {method:'get'})
+      fetch(apilinks.Processor + '?ShowAll=true' , {method:'get',  headers:{'Authorization': this.state.Authorization}})
       .then(response => response.json())
       .then(data => {
           this.setState({ ProcessorDropDown: this.SetDropdownTemplate(data,'processorId'), loading: false});  
@@ -236,7 +280,7 @@ export default class CommonComponent extends Component
         this.setState({loading: false , Message: 'No Record Found'})
       });
 
-      fetch(apilinks.Memory + '?ShowAll=true' , {method:'get'})
+      fetch(apilinks.Memory + '?ShowAll=true' , {method:'get' ,  headers:{'Authorization': this.state.Authorization}})
       .then(response => response.json())
       .then(data => {
           this.setState({ MemoryDropDown: this.SetDropdownTemplate(data, 'memoryId'), loading: false});  
@@ -244,7 +288,7 @@ export default class CommonComponent extends Component
         this.setState({loading: false , Message: 'No Record Found'})
       });
 
-      fetch(apilinks.VideoCard + '?ShowAll=true' , {method:'get'})
+      fetch(apilinks.VideoCard + '?ShowAll=true' , {method:'get' , headers:{'Authorization': this.state.Authorization}})
       .then(response => response.json())
       .then(data => {
           this.setState({ VideoCardDropDown: this.SetDropdownTemplate(data, 'videoCardId'), loading: false});  
@@ -252,7 +296,7 @@ export default class CommonComponent extends Component
         this.setState({loading: false , Message: 'No Record Found'})
       });
 
-      fetch(apilinks.Suppliers + '?ShowAll=true' , {method:'get'})
+      fetch(apilinks.Suppliers + '?ShowAll=true' , {method:'get' , headers:{'Authorization': this.state.Authorization}})
       .then(response => response.json())
       .then(data => {
           this.setState({ SuppliersDropDown: this.SetDropdownTemplate(data , 'supplierId'), loading: false});  
@@ -260,7 +304,7 @@ export default class CommonComponent extends Component
         this.setState({loading: false , Message: 'No Record Found'})
       });
 
-      fetch(apilinks.Categories + '?ShowAll=true' , {method:'get'})
+      fetch(apilinks.Categories + '?ShowAll=true' , {method:'get' , headers:{'Authorization': this.state.Authorization}})
       .then(response => response.json())
       .then(data => {
           this.setState({ CategoriesDropDown: this.SetDropdownTemplate(data, 'categoryId'), loading: false});  
@@ -299,6 +343,19 @@ export default class CommonComponent extends Component
           </Input>
         );
       }
+    }
+
+    CheckSession()
+    {
+      const cookies = new Cookies();
+      this.state.Authorization = "Bearer " + cookies.get('token');
+
+      fetch(this.state.link  , {method:'get', headers:{ 'Authorization': this.state.Authorization, 'Accept': 'application/json', 'Content-Type':'application/json'}})
+      .then(response => response.json())
+      .catch(error => {
+         this.context.router.history.push("/");
+      });
+
     }
 
     renderTablebyID(list) 
@@ -343,8 +400,7 @@ export default class CommonComponent extends Component
                   <Input name="purchaseCost" defaultValue={list.purchaseCost} s={6} label="purchaseCost" />
                   <Input name="warranty" defaultValue={list.warranty} s={6} label="warranty" />
                   <Input name="notes" defaultValue={list.notes} s={6} label="notes"  />
- 
-            
+         
                   <Input name='purchaseDate' s={6} value={list.purchaseDate} type='date' label="purchaseDate" />
                   <Input name='deliveryDate' s={6} value={list.deliveryDate} type='date' label="deliveryDate"  />
              
@@ -407,7 +463,7 @@ export default class CommonComponent extends Component
 
       return (      
         <div className="Table-Scroll">
-        <Table className="responsive-table striped highlight centered Table-Padding ">
+        <Table className="responsive-table striped highlight centered">
           <thead>
              {tableheader}
           </thead>
@@ -537,7 +593,7 @@ export default class CommonComponent extends Component
       
       return (      
         <div className="Table-Scroll">
-        <Table className="responsive-table striped highlight centered">
+        <Table className="responsive-table striped highlight centered Table-Padding" cellspacing="500">
           <thead>
             <tr> 
                {tableheader}

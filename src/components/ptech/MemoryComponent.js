@@ -24,6 +24,11 @@ export default class MemoryComponent extends Common {
 
     }
 
+    componentWillMount()
+    {
+      super.CheckSession();
+    }
+
     componentDidMount()
     {   
       super.GetWithPager();

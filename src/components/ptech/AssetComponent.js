@@ -1,8 +1,9 @@
 import React from 'react'
+import './Main.css';
 import Common from './CommonComponent';
 import {Pagination, Modal, Button, Row , Input , Icon} from 'react-materialize'
 
-export default class AssetComponent extends Common {
+export default class AssetComponent extends Common  {
 
     constructor(props) 
     {
@@ -14,6 +15,7 @@ export default class AssetComponent extends Common {
         listWithPager : [], 
         loading: true, 
         newcontents:'', 
+        PagerClass:'',
         showAll:false, 
         activePage:1, 
         PageType:'Asset',
@@ -26,6 +28,7 @@ export default class AssetComponent extends Common {
         VideoCardDropDown:'',
         SuppliersDropDown:'',
         CategoriesDropDown:'',
+        s_keyword:'',
         selectAPI :
         {
             Manufacturer: 'http://localhost:57254/api/Manufacturers/',
@@ -69,6 +72,10 @@ export default class AssetComponent extends Common {
 
     }
     
+    componentWillMount()
+    {
+      super.CheckSession();
+    }
 
     componentDidMount()
     {   
@@ -108,14 +115,6 @@ export default class AssetComponent extends Common {
            <Input s={3} name="s_keyword" label='Keyword' validate onChange={(event) => this.GetWithKeyword(event)}><Icon>search</Icon></Input> 
         </Row> 
 
-            {/* <Modal
-            id='ErrorModal'
-            actions={<Button className="modal-close waves-effect waves-green btn-flat">Submit<Icon left>send</Icon></Button> }
-            header= {'Error'}
-            trigger={<Button>Add {this.state.PageType}</Button>}
-            modalOptions={ { dismissible: true, inDuration: 3 } }
-            > */}
-
         {this.state.Message}
         {this.state.newcontents}
    
@@ -126,23 +125,23 @@ export default class AssetComponent extends Common {
           header= {'Add '+this.state.PageType}
           trigger={<Button>Add {this.state.PageType}</Button>}>
          <Row>      
-            <Input name="serialNo" s={6} label="serialNo" onChange={(event) => this.handleChange(event)} />
-            <Input name="assetTag" s={6} label="assetTag" onChange={(event) => this.handleChange(event)} />
-            <Input name="battery" s={6} label="battery" onChange={(event) => this.handleChange(event)} />
-            <Input name="adapter" s={6} label="adapter" onChange={(event) => this.handleChange(event)} />
-            <Input name="name" s={6} label="name" onChange={(event) => this.handleChange(event)} />
-            <Input name="assignedTo" s={6} label="assignedTo"  onChange={(event) => this.handleChange(event)} />     
-            <Input name="poNo" s={6} label="poNo" onChange={(event) => this.handleChange(event)} />
-            <Input name="drNo" s={6} label="drNo" onChange={(event) => this.handleChange(event)} />
-            <Input name="siNo" s={6} label="siNo" onChange={(event) => this.handleChange(event)} />
-            <Input name="macAddress" s={6} label="macAddress" onChange={(event) => this.handleChange(event)} />
-            <Input name="ipAddress" s={6} label="ipAddress" onChange={(event) => this.handleChange(event)} />
-            <Input name="purchaseCost" s={6} label="purchaseCost" onChange={(event) => this.handleChange(event)} />
-            <Input name="warranty" s={6} label="warranty" onChange={(event) => this.handleChange(event)} />
-            <Input name="notes" s={6} label="notes"  onChange={(event) => this.handleChange(event)} />
+            <Input name="serialNo" s={6} label="Serial Number" onChange={(event) => this.handleChange(event)} />
+            <Input name="assetTag" s={6} label="Asset Tag" onChange={(event) => this.handleChange(event)} />
+            <Input name="battery" s={6} label="Battery" onChange={(event) => this.handleChange(event)} />
+            <Input name="adapter" s={6} label="Adapter" onChange={(event) => this.handleChange(event)} />
+            <Input name="name" s={6} label="Asset Name" onChange={(event) => this.handleChange(event)} />
+            <Input name="assignedTo" s={6} label="Assigned To"  onChange={(event) => this.handleChange(event)} />     
+            <Input name="poNo" s={6} label="PO No#" onChange={(event) => this.handleChange(event)} />
+            <Input name="drNo" s={6} label="DR No#" onChange={(event) => this.handleChange(event)} />
+            <Input name="siNo" s={6} label="SI NO#" onChange={(event) => this.handleChange(event)} />
+            <Input name="macAddress" s={6} label="Mac Address" onChange={(event) => this.handleChange(event)} />
+            <Input name="ipAddress" s={6} label="IP Address" onChange={(event) => this.handleChange(event)} />
+            <Input name="purchaseCost" s={6} label="Purchase Cost" onChange={(event) => this.handleChange(event)} />
+            <Input name="warranty" s={6} label="Warranty" onChange={(event) => this.handleChange(event)} />
+            <Input name="notes" s={6} label="Notes"  onChange={(event) => this.handleChange(event)} />
 
-            <Input name='purchaseDate' s={6} type='date' label="purchaseDate" onChange={(event) => this.handleChange(event)}  />
-            <Input name='deliveryDate' s={6} type='date' label="deliveryDate" onChange={(event) => this.handleChange(event)}  />
+            <Input name='purchaseDate' s={6} type='date' label="Purchase Date" onChange={(event) => this.handleChange(event)}  />
+            <Input name='deliveryDate' s={6} type='date' label="Delivery Date" onChange={(event) => this.handleChange(event)}  />
             
             <Input name="status" s={6} type='select' label="Status" defaultValue='0' onChange={(event) => this.handleChange(event)}>
                 <option value='0'></option>
@@ -169,8 +168,9 @@ export default class AssetComponent extends Common {
                 <Input type='checkbox' label='DisplayAll' onChange={(event) => super.TogglePage(event)}/>
             </center>
 
-
-            <Pagination items={this.state.listWithPager.totalPage} activePage={this.state._activePage} maxButtons={this.state.listWithPager.totalPage} onSelect={this.FetchPage}/>
+            <div className={this.state.PagerClass}>
+                <Pagination items={this.state.listWithPager.totalPage} activePage={this.state._activePage} maxButtons={this.state.listWithPager.totalPage} onSelect={this.FetchPage}/>
+            </div>
         </div>
       );
       

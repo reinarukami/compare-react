@@ -2,7 +2,7 @@ import React from 'react'
 import Common from './CommonComponent';
 import {Pagination, Modal, Button, Row , Input , Icon} from 'react-materialize'
 
-export default class HardDiskComponent extends Common {
+export default class UsersComponent extends Common {
 
     constructor(props) 
     {
@@ -16,10 +16,10 @@ export default class HardDiskComponent extends Common {
         newcontents:'', 
         showAll:false, 
         activePage:1, 
-        PageType:'HardDisk',
-        link:'http://localhost:57254/api/Sizes/harddisk/',
-        postState : {size:''},
-        putState : {id:'',size:''}
+        PageType:'User',
+        link:'http://localhost:57254/api/Users/',
+        postState : {name:''},
+        putState : {id:'',name:''}
       };
 
     }
@@ -36,7 +36,7 @@ export default class HardDiskComponent extends Common {
 
     handleChange = (event) =>
     {     
-      this.state.postState.size = event.target.value;
+      this.state.postState.name = event.target.value;
     }
 
     handleUpdate = (_formID) =>
@@ -51,12 +51,10 @@ export default class HardDiskComponent extends Common {
     }
 
     render() {
-  
         
       return (
         <div className="container">
    
-
         <Row>
            <Input s={3} name="s_processorID" label={this.state.PageType + ' ID'} validate onChange={(event) => this.GetWithID(event)}><Icon>search</Icon></Input> 
         </Row> 
@@ -72,7 +70,7 @@ export default class HardDiskComponent extends Common {
           trigger={<Button>Add {this.state.PageType}</Button>}>
 
                 <Row>
-                    <Input name="size" type="email" label={'Add '+this.state.PageType} s={12} onChange={(event) => this.handleChange(event)}/>            
+                    <Input name="name" type="email" label={'Add '+this.state.PageType} s={12} onChange={(event) => this.handleChange(event)}/>            
                 </Row> 
 
         </Modal>

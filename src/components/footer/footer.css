@@ -1,0 +1,7 @@
+.Footer-Sticky {
+  bottom: 0;
+  padding-top: 100px;
+  position: fixed;
+  width: 100%;
+}
+

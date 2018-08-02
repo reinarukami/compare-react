@@ -24,6 +24,11 @@ export default class ManufacturerComponent extends Common {
 
     }
 
+    componentWillMount()
+    {
+      super.CheckSession();
+    }
+
     componentDidMount()
     {   
       super.GetWithPager();

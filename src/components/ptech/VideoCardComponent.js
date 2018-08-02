@@ -23,6 +23,11 @@ export default class VideoCard extends Common {
 
     }
 
+    componentWillMount()
+    {
+      super.CheckSession();
+    }
+
     componentDidMount()
     {   
       super.GetWithPager();
